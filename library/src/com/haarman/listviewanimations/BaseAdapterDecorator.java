@@ -171,4 +171,6 @@ public abstract class BaseAdapterDecorator extends BaseAdapter implements Sectio
 	public BaseAdapter getDecoratedBaseAdapter() {
 		return mDecoratedBaseAdapter;
 	}
+
+
 }
