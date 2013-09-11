@@ -16,13 +16,12 @@
  */
 package com.haarman.listviewanimations.itemmanipulation.contextualundo;
 
-import static com.nineoldandroids.view.ViewHelper.setAlpha;
-import static com.nineoldandroids.view.ViewHelper.setTranslationX;
-import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,10 +33,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.haarman.listviewanimations.BaseAdapterDecorator;
-import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.AnimatorListenerAdapter;
-import com.nineoldandroids.animation.ValueAnimator;
-import com.nineoldandroids.view.ViewHelper;
 
 /**
  * Warning: a stable id for each item in the adapter is required. The decorated
@@ -191,8 +186,8 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 	}
 
 	private void restoreViewPosition(View view) {
-		setAlpha(view, 1f);
-		setTranslationX(view, 0);
+		view.setAlpha(1f);
+		view.setTranslationX(0);
 	}
 
 	private void removePreviousContextualUndoIfPresent() {
@@ -357,11 +352,11 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 		}
 
 		private void moveViewOffScreen() {
-			ViewHelper.setTranslationX(mContextualUndoView, mContextualUndoView.getWidth());
+            mContextualUndoView.setTranslationX(mContextualUndoView.getWidth());
 		}
 
 		private void animateViewComingBack() {
-			animate(mContextualUndoView).translationX(0).setDuration(ANIMATION_DURATION).setListener(null);
+			mContextualUndoView.animate().translationX(0).setDuration(ANIMATION_DURATION).setListener(null);
 		}
 	}
 

@@ -18,13 +18,13 @@
  */
 package com.haarman.listviewanimations.itemmanipulation;
 
-import static com.nineoldandroids.view.ViewHelper.setAlpha;
-import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
@@ -34,11 +34,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
-
-import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.AnimatorListenerAdapter;
-import com.nineoldandroids.animation.ValueAnimator;
-import com.nineoldandroids.view.ViewHelper;
 
 /**
  * A {@link android.view.View.OnTouchListener} that makes the list items in a
@@ -189,8 +184,8 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 		}
 
 		if (mSwiping) {
-			ViewHelper.setTranslationX(mCurrentDismissData.view, deltaX);
-			setAlpha(mCurrentDismissData.view, Math.max(0f, Math.min(1f, 1f - 2f * Math.abs(deltaX) / mViewWidth)));
+            mCurrentDismissData.view.setTranslationX(deltaX);
+            mCurrentDismissData.view.setAlpha(Math.max(0f, Math.min(1f, 1f - 2f * Math.abs(deltaX) / mViewWidth)));
 			return true;
 		}
 		return false;
@@ -220,7 +215,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 			// mDownView gets null'd before animation ends
 			final PendingDismissData pendingDismissData = mCurrentDismissData;
 			++mDismissAnimationRefCount;
-			animate(mCurrentDismissData.view).translationX(dismissRight ? mViewWidth : -mViewWidth).alpha(0).setDuration(mAnimationTime).setListener(new AnimatorListenerAdapter() {
+			mCurrentDismissData.view.animate().translationX(dismissRight ? mViewWidth : -mViewWidth).alpha(0).setDuration(mAnimationTime).setListener(new AnimatorListenerAdapter() {
 				@Override
 				public void onAnimationEnd(Animator animation) {
 					performDismiss(pendingDismissData);
@@ -230,7 +225,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 			mPendingDismisses.add(mCurrentDismissData);
 		} else {
 			// cancel
-			animate(mCurrentDismissData.view).translationX(0).alpha(1).setDuration(mAnimationTime).setListener(null);
+			mCurrentDismissData.view.animate().translationX(0).alpha(1).setDuration(mAnimationTime).setListener(null);
 		}
 		mVelocityTracker = null;
 		mDownX = 0;
@@ -268,7 +263,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 				return true;
 			if (obj == null)
 				return false;
-			if (getClass() != obj.getClass())
+			if (((Object)this).getClass() != obj.getClass())
 				return false;
 			PendingDismissData other = (PendingDismissData) obj;
 			if (position != other.position)
@@ -314,8 +309,8 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 					ViewGroup.LayoutParams lp;
 					for (PendingDismissData pendingDismiss : mPendingDismisses) {
 						// Reset view presentation
-						ViewHelper.setAlpha(pendingDismiss.view, 1f);
-						ViewHelper.setTranslationX(pendingDismiss.view, 0);
+                        pendingDismiss.view.setAlpha(1f);
+                        pendingDismiss.view.setTranslationX(0);
 						lp = pendingDismiss.view.getLayoutParams();
 						lp.height = 0;
 						pendingDismiss.view.setLayoutParams(lp);

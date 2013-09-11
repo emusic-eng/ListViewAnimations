@@ -18,6 +18,8 @@
 
 package com.haarman.listviewanimations.itemmanipulation.contextualundo;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -27,13 +29,6 @@ import android.view.ViewConfiguration;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
-
-import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.AnimatorListenerAdapter;
-
-import static com.nineoldandroids.view.ViewHelper.setAlpha;
-import static com.nineoldandroids.view.ViewHelper.setTranslationX;
-import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
 
 /**
  * An {@link OnTouchListener} for the {@link ContextualUndoAdapter}. Don't use
@@ -161,7 +156,7 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 					final View downView = mDownView; // mDownView gets none'd
 														// before animation ends
 					final int downPosition = mDownPosition;
-					animate(mDownView).translationX(dismissRight ? mViewWidth : -mViewWidth).alpha(0).setDuration(mAnimationTime).setListener(new AnimatorListenerAdapter() {
+					mDownView.animate().translationX(dismissRight ? mViewWidth : -mViewWidth).alpha(0).setDuration(mAnimationTime).setListener(new AnimatorListenerAdapter() {
 						@Override
 						public void onAnimationEnd(Animator animation) {
 							mCallback.onViewSwiped(downView, downPosition);
@@ -169,7 +164,7 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 					});
 				} else {
 					// cancel
-					animate(mDownView).translationX(0).alpha(1).setDuration(mAnimationTime).setListener(null);
+					mDownView.animate().translationX(0).alpha(1).setDuration(mAnimationTime).setListener(null);
 				}
 				mVelocityTracker = null;
 				mDownX = 0;
@@ -197,8 +192,8 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 				}
 
 				if (mSwiping) {
-					setTranslationX(mDownView, deltaX);
-					setAlpha(mDownView, Math.max(0f, Math.min(1f, 1f - 2f * Math.abs(deltaX) / mViewWidth)));
+                    mDownView.setTranslationX(deltaX);
+                    mDownView.setAlpha(Math.max(0f, Math.min(1f, 1f - 2f * Math.abs(deltaX) / mViewWidth)));
 					return true;
 				}
 				break;

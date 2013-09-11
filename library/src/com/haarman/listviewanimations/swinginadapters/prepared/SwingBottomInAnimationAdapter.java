@@ -15,13 +15,13 @@
  */
 package com.haarman.listviewanimations.swinginadapters.prepared;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.haarman.listviewanimations.swinginadapters.SingleAnimationAdapter;
-import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.ObjectAnimator;
 
 /**
  * An implementation of the AnimationAdapter class which applies a

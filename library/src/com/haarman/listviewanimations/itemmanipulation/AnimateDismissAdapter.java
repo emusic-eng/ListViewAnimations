@@ -21,16 +21,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.haarman.listviewanimations.BaseAdapterDecorator;
-import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.Animator.AnimatorListener;
-import com.nineoldandroids.animation.AnimatorSet;
-import com.nineoldandroids.animation.ValueAnimator;
-import com.nineoldandroids.animation.ValueAnimator.AnimatorUpdateListener;
 
 /**
  * A {@link BaseAdapterDecorator} class that provides animations to the removal
@@ -86,7 +84,7 @@ public class AnimateDismissAdapter<T> extends BaseAdapterDecorator {
 			}
 
 			animatorSet.playTogether(animatorsArray);
-			animatorSet.addListener(new AnimatorListener() {
+			animatorSet.addListener(new Animator.AnimatorListener() {
 
 				@Override
 				public void onAnimationStart(Animator animator) {
@@ -137,7 +135,7 @@ public class AnimateDismissAdapter<T> extends BaseAdapterDecorator {
 		final int originalHeight = view.getHeight();
 
 		ValueAnimator animator = ValueAnimator.ofInt(originalHeight, 0);
-		animator.addListener(new AnimatorListener() {
+		animator.addListener(new Animator.AnimatorListener() {
 
 			@Override
 			public void onAnimationStart(Animator animator) {
@@ -158,7 +156,7 @@ public class AnimateDismissAdapter<T> extends BaseAdapterDecorator {
 			}
 		});
 
-		animator.addUpdateListener(new AnimatorUpdateListener() {
+		animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
 			@Override
 			public void onAnimationUpdate(ValueAnimator valueAnimator) {
