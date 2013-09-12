@@ -68,7 +68,7 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 	private DeleteItemCallback mDeleteItemCallback;
 	private CountDownFormatter mCountDownFormatter;
 
-    ContextualUndoListViewTouchListener contextualUndoListViewTouchListener;
+    ContextualUndoListViewTouchListener mContextualUndoListViewTouchListener;
 
 	/**
 	 * Create a new ContextualUndoAdapter based on given parameters.
@@ -153,10 +153,11 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 	@Override
 	public void setAbsListView(AbsListView listView) {
 		super.setAbsListView(listView);
-		contextualUndoListViewTouchListener = new ContextualUndoListViewTouchListener(listView, this);
-        contextualUndoListViewTouchListener.setIsParentHorizontalScrollContainer(isParentHorizontalScrollContainer());
-		listView.setOnTouchListener(contextualUndoListViewTouchListener);
-		listView.setOnScrollListener(contextualUndoListViewTouchListener.makeScrollListener());
+		mContextualUndoListViewTouchListener = new ContextualUndoListViewTouchListener(listView, this);
+        mContextualUndoListViewTouchListener.setIsParentHorizontalScrollContainer(isParentHorizontalScrollContainer());
+        mContextualUndoListViewTouchListener.setTouchChild(getTouchChild());
+		listView.setOnTouchListener(mContextualUndoListViewTouchListener);
+		listView.setOnScrollListener(mContextualUndoListViewTouchListener.makeScrollListener());
 		listView.setRecyclerListener(new RecycleViewListener());
 	}
 
@@ -253,8 +254,16 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
     @Override
     public void setIsParentHorizontalScrollContainer(boolean isParentHorizontalScrollContainer) {
         super.setIsParentHorizontalScrollContainer(isParentHorizontalScrollContainer);
-        if (contextualUndoListViewTouchListener != null) {
-            contextualUndoListViewTouchListener.setIsParentHorizontalScrollContainer(isParentHorizontalScrollContainer);
+        if (mContextualUndoListViewTouchListener != null) {
+            mContextualUndoListViewTouchListener.setIsParentHorizontalScrollContainer(isParentHorizontalScrollContainer);
+        }
+    }
+
+    @Override
+    public void setTouchChild(int childResId) {
+        super.setTouchChild(childResId);
+        if (mContextualUndoListViewTouchListener != null) {
+            mContextualUndoListViewTouchListener.setTouchChild(childResId);
         }
     }
 

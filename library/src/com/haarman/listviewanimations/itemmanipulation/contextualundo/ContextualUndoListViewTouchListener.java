@@ -26,6 +26,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
@@ -48,7 +49,7 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 	private int mViewWidth = 1; // 1 and not 0 to prevent dividing by zero
 
 	// Transient properties
-	private float mDownX;
+	private float mDownX, mDownY;
 	private boolean mSwiping;
 	private VelocityTracker mVelocityTracker;
 	private int mDownPosition;
@@ -56,6 +57,8 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 	private boolean mPaused;
 
     private boolean mIsParentHorizontalScrollContainer;
+    private int     mResIdOfTouchChild;
+    private boolean mTouchChildTouched;
 
     public interface Callback {
 
@@ -124,12 +127,30 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 				}
 
                 if (mDownView != null && mDownView instanceof ContextualUndoView) {
+                    mDownX = motionEvent.getRawX();
+                    mDownY = motionEvent.getRawY();
+
+                    mTouchChildTouched = !mIsParentHorizontalScrollContainer && (mResIdOfTouchChild == 0);
+
+                    if (mResIdOfTouchChild != 0) {
+                        mIsParentHorizontalScrollContainer = false;
+
+                        final View childView = mDownView.findViewById(mResIdOfTouchChild);
+                        if  (childView != null) {
+                            final Rect childRect = getChildViewRect(mListView, childView);
+                            if (childRect.contains((int)mDownX, (int)mDownY)) {
+                                mTouchChildTouched = true;
+                                mListView.requestDisallowInterceptTouchEvent(true);
+                            }
+                        }
+                    }
+
                     if (mIsParentHorizontalScrollContainer) {
                         // Do it now and don't wait until the user moves more than the slop factor.
+                        mTouchChildTouched = true;
                         mListView.requestDisallowInterceptTouchEvent(true);
                     }
 
-					mDownX = motionEvent.getRawX();
 					mDownPosition = mListView.getPositionForView(mDownView);
 
 					mVelocityTracker = VelocityTracker.obtain();
@@ -140,6 +161,7 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 			}
 
 			case MotionEvent.ACTION_UP: {
+                mTouchChildTouched = false;
 				if (mVelocityTracker == null) {
 					break;
 				}
@@ -189,7 +211,7 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 
 				mVelocityTracker.addMovement(motionEvent);
 				float deltaX = motionEvent.getRawX() - mDownX;
-				if (Math.abs(deltaX) > mSlop) {
+				if (mTouchChildTouched && (Math.abs(deltaX) > mSlop)) {
 					mSwiping = true;
 					mListView.requestDisallowInterceptTouchEvent(true);
 
@@ -210,7 +232,30 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
     	return false;
 	}
 
+    private Rect getChildViewRect(View parentView, View childView) {
+        final Rect childRect = new Rect(childView.getLeft(), childView.getTop(), childView.getRight(), childView.getBottom());
+        if (parentView == childView) {
+            return childRect;
+
+        }
+
+        ViewGroup parent;
+        while ((parent = (ViewGroup)childView.getParent()) != parentView) {
+            childRect.offset(parent.getLeft(), parent.getTop());
+            childView = parent;
+        }
+
+        return childRect;
+    }
+
     void setIsParentHorizontalScrollContainer(boolean isParentHorizontalScrollContainer) {
-        mIsParentHorizontalScrollContainer = isParentHorizontalScrollContainer;
+        mIsParentHorizontalScrollContainer = (mResIdOfTouchChild == 0)? isParentHorizontalScrollContainer : false;
+    }
+
+    void setTouchChild(int childResId) {
+        mResIdOfTouchChild = childResId;
+        if (childResId != 0) {
+            setIsParentHorizontalScrollContainer(false);
+        }
     }
 }

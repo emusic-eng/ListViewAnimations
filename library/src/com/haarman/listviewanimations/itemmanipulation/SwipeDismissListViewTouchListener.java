@@ -85,6 +85,8 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 
     private boolean mDisallowSwipe;
     private boolean mIsParentHorizontalScrollContainer;
+    private int     mResIdOfTouchChild;
+    private boolean mTouchChildTouched;
 
     /**
 	 * Constructs a new swipe-to-dismiss touch listener for the given list view.
@@ -137,6 +139,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 		case MotionEvent.ACTION_UP:
         case MotionEvent.ACTION_CANCEL:
             mDisallowSwipe = false;
+            mTouchChildTouched = false;
 			return handleUpEvent(motionEvent);
 		}
 		return false;
@@ -175,8 +178,24 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 				mCurrentDismissData = null;
 				return false;
 			} else {
+                mTouchChildTouched = !mIsParentHorizontalScrollContainer && (mResIdOfTouchChild == 0);
+
+                if (mResIdOfTouchChild != 0) {
+                    mIsParentHorizontalScrollContainer = false;
+
+                    final View childView = downView.findViewById(mResIdOfTouchChild);
+                    if  (childView != null) {
+                        final Rect childRect = getChildViewRect(mListView, childView);
+                        if (childRect.contains((int)mDownX, (int)mDownY)) {
+                            mTouchChildTouched = true;
+                            mListView.requestDisallowInterceptTouchEvent(true);
+                        }
+                    }
+                }
+
                 if (mIsParentHorizontalScrollContainer) {
                     // Do it now and don't wait until the user moves more than the slop factor.
+                    mTouchChildTouched = true;
                     mListView.requestDisallowInterceptTouchEvent(true);
                 }
 				mVelocityTracker = VelocityTracker.obtain();
@@ -186,6 +205,22 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 		return true;
 	}
 
+    private Rect getChildViewRect(View parentView, View childView) {
+        final Rect childRect = new Rect(childView.getLeft(), childView.getTop(), childView.getRight(), childView.getBottom());
+        if (parentView == childView) {
+            return childRect;
+
+        }
+
+        ViewGroup parent;
+        while ((parent = (ViewGroup)childView.getParent()) != parentView) {
+            childRect.offset(parent.getLeft(), parent.getTop());
+            childView = parent;
+        }
+
+        return childRect;
+    }
+
 	private boolean handleMoveEvent(MotionEvent motionEvent) {
 		if (mVelocityTracker == null || mPaused) {
 			return false;
@@ -194,7 +229,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 		mVelocityTracker.addMovement(motionEvent);
 		float deltaX = motionEvent.getRawX() - mDownX;
 		float deltaY = motionEvent.getRawY() - mDownY;
-		if (!mDisallowSwipe && Math.abs(deltaX) > mSlop && Math.abs(deltaX) > Math.abs(deltaY)) {
+		if (mTouchChildTouched && !mDisallowSwipe && Math.abs(deltaX) > mSlop && Math.abs(deltaX) > Math.abs(deltaY)) {
 			mSwiping = true;
 			mListView.requestDisallowInterceptTouchEvent(true);
 
@@ -348,6 +383,13 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
 	}
 
     void setIsParentHorizontalScrollContainer(boolean isParentHorizontalScrollContainer) {
-        mIsParentHorizontalScrollContainer = isParentHorizontalScrollContainer;
+        mIsParentHorizontalScrollContainer = (mResIdOfTouchChild == 0)? isParentHorizontalScrollContainer : false;
+    }
+
+    void setTouchChild(int childResId) {
+        mResIdOfTouchChild = childResId;
+        if (childResId != 0) {
+            setIsParentHorizontalScrollContainer(false);
+        }
     }
 }
