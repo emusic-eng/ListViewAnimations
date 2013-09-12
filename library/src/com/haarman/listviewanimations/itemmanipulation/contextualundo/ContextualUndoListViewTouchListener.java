@@ -55,7 +55,9 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 	private View mDownView;
 	private boolean mPaused;
 
-	public interface Callback {
+    private boolean mIsParentHorizontalScrollContainer;
+
+    public interface Callback {
 
 		void onViewSwiped(View dismissView, int dismissPosition);
 
@@ -122,6 +124,11 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 				}
 
                 if (mDownView != null && mDownView instanceof ContextualUndoView) {
+                    if (mIsParentHorizontalScrollContainer) {
+                        // Do it now and don't wait until the user moves more than the slop factor.
+                        mListView.requestDisallowInterceptTouchEvent(true);
+                    }
+
 					mDownX = motionEvent.getRawX();
 					mDownPosition = mListView.getPositionForView(mDownView);
 
@@ -166,6 +173,7 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 					// cancel
 					mDownView.animate().translationX(0).alpha(1).setDuration(mAnimationTime).setListener(null);
 				}
+                mVelocityTracker.recycle();
 				mVelocityTracker = null;
 				mDownX = 0;
 				mDownView = null;
@@ -201,4 +209,8 @@ public class ContextualUndoListViewTouchListener implements View.OnTouchListener
 		}
     	return false;
 	}
+
+    void setIsParentHorizontalScrollContainer(boolean isParentHorizontalScrollContainer) {
+        mIsParentHorizontalScrollContainer = isParentHorizontalScrollContainer;
+    }
 }

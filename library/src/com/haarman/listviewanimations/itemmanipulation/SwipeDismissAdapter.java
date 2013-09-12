@@ -29,8 +29,9 @@ import com.haarman.listviewanimations.BaseAdapterDecorator;
 public class SwipeDismissAdapter extends BaseAdapterDecorator {
 
 	private OnDismissCallback mCallback;
+    private SwipeDismissListViewTouchListener mOnTouchListener;
 
-	public SwipeDismissAdapter(BaseAdapter baseAdapter, OnDismissCallback callback) {
+    public SwipeDismissAdapter(BaseAdapter baseAdapter, OnDismissCallback callback) {
 		super(baseAdapter);
 		mCallback = callback;
 	}
@@ -38,6 +39,16 @@ public class SwipeDismissAdapter extends BaseAdapterDecorator {
 	@Override
 	public void setAbsListView(AbsListView listView) {
 		super.setAbsListView(listView);
-		listView.setOnTouchListener(new SwipeDismissListViewTouchListener(listView, mCallback));
+        mOnTouchListener = new SwipeDismissListViewTouchListener(listView, mCallback);
+        mOnTouchListener.setIsParentHorizontalScrollContainer(isParentHorizontalScrollContainer());
+        listView.setOnTouchListener(mOnTouchListener);
 	}
+
+    @Override
+    public void setIsParentHorizontalScrollContainer(boolean isParentHorizontalScrollContainer) {
+        super.setIsParentHorizontalScrollContainer(isParentHorizontalScrollContainer);
+        if (mOnTouchListener != null) {
+            mOnTouchListener.setIsParentHorizontalScrollContainer(isParentHorizontalScrollContainer);
+        }
+    }
 }

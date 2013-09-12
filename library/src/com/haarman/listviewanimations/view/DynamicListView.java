@@ -1,7 +1,18 @@
 /*
- * Copyright (c) 2013 K–NFB Reading Technology, Inc.
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package com.haarman.listviewanimations.view;
 
 import android.animation.Animator;
@@ -27,8 +38,6 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import java.util.ArrayList;
-
 /**
  * The dynamic listview is an extension of listview that supports cell dragging
  * and swapping.
@@ -49,6 +58,9 @@ import java.util.ArrayList;
  *
  * When the hover cell is either above or below the bounds of the listview, this
  * listview also scrolls on its own so as to reveal additional content.
+ *
+ * See http://youtu.be/_BZIvjMgH-Q
+ *
  */
 public class DynamicListView extends ListView {
 
@@ -56,7 +68,7 @@ public class DynamicListView extends ListView {
     private final int MOVE_DURATION = 150;
     private final int LINE_THICKNESS = 15;
 
-    public ArrayList<String> mCheeseList;
+    //public ArrayList<String> mCheeseList;
 
     private int mLastEventY = -1;
 
@@ -83,6 +95,9 @@ public class DynamicListView extends ListView {
 
     private boolean mIsWaitingForScrollFinish = false;
     private int mScrollState = OnScrollListener.SCROLL_STATE_IDLE;
+
+    private OnTouchListener mOnTouchListener;
+    private boolean mIsParentHorizontalScrollContainer;
 
     public DynamicListView(Context context) {
         super(context);
@@ -124,6 +139,7 @@ public class DynamicListView extends ListView {
                     selectedView.setVisibility(INVISIBLE);
 
                     mCellIsMobile = true;
+                    getParent().requestDisallowInterceptTouchEvent(true);
 
                     updateNeighborViewsForID(mMobileItemId);
 
@@ -239,14 +255,29 @@ public class DynamicListView extends ListView {
     }
 
     @Override
+    public void setOnTouchListener(OnTouchListener l) {
+        mOnTouchListener = l;
+    }
+
+    private boolean mSkipCallingOnTouchListener;
+    @Override
     public boolean onTouchEvent (MotionEvent event) {
+        if (mSkipCallingOnTouchListener) {
+            return super.onTouchEvent(event);
+        }
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
+                if (mIsParentHorizontalScrollContainer) {
+                    // Do it now and don't wait until the user moves more than the slop factor.
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                }
+
                 mDownX = (int)event.getX();
                 mDownY = (int)event.getY();
                 mActivePointerId = event.getPointerId(0);
                 break;
+
             case MotionEvent.ACTION_MOVE:
                 if (mActivePointerId == INVALID_POINTER_ID) {
                     break;
@@ -267,16 +298,17 @@ public class DynamicListView extends ListView {
 
                     mIsMobileScrolling = false;
                     handleMobileCellScroll();
-
-                    return false;
                 }
                 break;
+
             case MotionEvent.ACTION_UP:
                 touchEventsEnded();
                 break;
+
             case MotionEvent.ACTION_CANCEL:
                 touchEventsCancelled();
                 break;
+
             case MotionEvent.ACTION_POINTER_UP:
                 /* If a multitouch event took place and the original touch dictating
                  * the movement of the hover cell has ended, then the dragging event
@@ -293,6 +325,17 @@ public class DynamicListView extends ListView {
                 break;
         }
 
+        if (mCellIsMobile) {
+            return false;
+        }
+        else if (mOnTouchListener != null) {
+            mSkipCallingOnTouchListener = true;
+            boolean retVal = mOnTouchListener.onTouch(this, event);
+            mSkipCallingOnTouchListener = false;
+            if (retVal) {
+               return true;
+            }
+        }
         return super.onTouchEvent(event);
     }
 
@@ -327,7 +370,7 @@ public class DynamicListView extends ListView {
                 return;
             }
 
-            swapElements(mCheeseList, originalItem, getPositionForView(switchView));
+            swapElements(originalItem, getPositionForView(switchView));
 
             ((BaseAdapter) getAdapter()).notifyDataSetChanged();
 
@@ -365,10 +408,11 @@ public class DynamicListView extends ListView {
         }
     }
 
-    private void swapElements(ArrayList arrayList, int indexOne, int indexTwo) {
-        Object temp = arrayList.get(indexOne);
-        arrayList.set(indexOne, arrayList.get(indexTwo));
-        arrayList.set(indexTwo, temp);
+    private void swapElements(int indexOne, int indexTwo) {
+        ListAdapter adapter = getAdapter();
+        if (adapter instanceof Swapable) {
+            ((Swapable)adapter).swapItems(indexOne, indexTwo);
+        }
     }
 
 
@@ -495,8 +539,12 @@ public class DynamicListView extends ListView {
         return false;
     }
 
-    public void setCheeseList(ArrayList<String> cheeseList) {
-        mCheeseList = cheeseList;
+    public void setIsParentHorizontalScrollContainer(boolean isParentHorizontalScrollContainer) {
+        mIsParentHorizontalScrollContainer = isParentHorizontalScrollContainer;
+    }
+
+    public boolean isParentHorizontalScrollContainer() {
+        return mIsParentHorizontalScrollContainer;
     }
 
     /**
