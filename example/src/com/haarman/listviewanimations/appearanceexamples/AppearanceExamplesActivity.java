@@ -18,23 +18,17 @@ package com.haarman.listviewanimations.appearanceexamples;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBar.OnNavigationListener;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.emilsjolander.components.stickylistheaders.StickyListHeadersAdapter;
 import com.haarman.listviewanimations.ArrayAdapter;
-import com.haarman.listviewanimations.BaseActivity;
+import com.haarman.listviewanimations.MyListActivity;
 import com.haarman.listviewanimations.R;
 import com.haarman.listviewanimations.swinginadapters.AnimationAdapter;
 import com.haarman.listviewanimations.swinginadapters.prepared.AlphaInAnimationAdapter;
@@ -43,86 +37,63 @@ import com.haarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnim
 import com.haarman.listviewanimations.swinginadapters.prepared.SwingLeftInAnimationAdapter;
 import com.haarman.listviewanimations.swinginadapters.prepared.SwingRightInAnimationAdapter;
 
-public class AppearanceExamplesActivity extends BaseActivity implements OnNavigationListener {
+public class AppearanceExamplesActivity extends MyListActivity implements OnNavigationListener {
 
 	private BaseAdapter mAdapter;
-
-	private ListView mListView;
-	private ListView mStickyListView;
-
-	private ListView mCurrentListView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_appearanceexample);
 
-		mListView = (ListView) findViewById(R.id.activity_appearanceexample_listview);
-		mStickyListView = (ListView) findViewById(R.id.activity_appearanceexample_stickylistview);
-
-		mCurrentListView = mListView;
-		mStickyListView.setVisibility(View.GONE);
-
-		mAdapter = new MyStickyListAdapter(this, getItems());
-
+		mAdapter = new MyAdapter(this, getItems());
 		setAlphaAdapter();
 
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		getSupportActionBar().setListNavigationCallbacks(new AnimSelectionAdapter(), this);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-		Toast.makeText(this, "You can turn StickyListHeaders on or off in the menu", Toast.LENGTH_LONG).show();
 	}
 
 	private void setAlphaAdapter() {
 		AnimationAdapter animAdapter = new AlphaInAnimationAdapter(mAdapter);
-		animAdapter.setAbsListView(mCurrentListView);
-		mCurrentListView.setAdapter(animAdapter);
+		animAdapter.setAbsListView(getListView());
+		getListView().setAdapter(animAdapter);
 	}
 
 	private void setLeftAdapter() {
 		AnimationAdapter animAdapter = new SwingLeftInAnimationAdapter(mAdapter);
-		animAdapter.setAbsListView(mCurrentListView);
-		mCurrentListView.setAdapter(animAdapter);
+		animAdapter.setAbsListView(getListView());
+		getListView().setAdapter(animAdapter);
 	}
 
 	private void setRightAdapter() {
 		AnimationAdapter animAdapter = new SwingRightInAnimationAdapter(mAdapter);
-		animAdapter.setAbsListView(mCurrentListView);
-		mCurrentListView.setAdapter(animAdapter);
+		animAdapter.setAbsListView(getListView());
+		getListView().setAdapter(animAdapter);
 	}
 
 	private void setBottomAdapter() {
 		AnimationAdapter animAdapter = new SwingBottomInAnimationAdapter(mAdapter);
-		animAdapter.setAbsListView(mCurrentListView);
-		mCurrentListView.setAdapter(animAdapter);
+		animAdapter.setAbsListView(getListView());
+		getListView().setAdapter(animAdapter);
 	}
 
 	private void setBottomRightAdapter() {
 		AnimationAdapter animAdapter = new SwingBottomInAnimationAdapter(new SwingRightInAnimationAdapter(mAdapter));
-		animAdapter.setAbsListView(mCurrentListView);
-		mCurrentListView.setAdapter(animAdapter);
+		animAdapter.setAbsListView(getListView());
+		getListView().setAdapter(animAdapter);
 	}
 
 	private void setScaleAdapter() {
 		AnimationAdapter animAdapter = new ScaleInAnimationAdapter(mAdapter);
-		animAdapter.setAbsListView(mCurrentListView);
-		mCurrentListView.setAdapter(animAdapter);
+		animAdapter.setAbsListView(getListView());
+		getListView().setAdapter(animAdapter);
 	}
 
-	private static ArrayList<Integer> getItems() {
-		ArrayList<Integer> items = new ArrayList<Integer>();
-		for (int i = 0; i < 1000; i++) {
-			items.add(i);
-		}
-		return items;
-	}
-
-	private static class MyStickyListAdapter extends ArrayAdapter<Integer> implements StickyListHeadersAdapter {
+	private static class MyAdapter extends ArrayAdapter<Integer> {
 
 		private Context mContext;
 
-		public MyStickyListAdapter(Context context, ArrayList<Integer> items) {
+		public MyAdapter(Context context, ArrayList<Integer> items) {
 			super(items);
 			mContext = context;
 		}
@@ -141,50 +112,9 @@ public class AppearanceExamplesActivity extends BaseActivity implements OnNaviga
 			tv.setText("This is row number " + getItem(position));
 			return tv;
 		}
-
-		@Override
-		public long getHeaderId(int position) {
-			return getItem(position) / 10;
-		}
-
-		@Override
-		public View getHeaderView(int position, View convertView, ViewGroup parent) {
-			TextView tv = (TextView) convertView;
-			if (tv == null) {
-				tv = (TextView) LayoutInflater.from(mContext).inflate(R.layout.list_row, parent, false);
-				tv.setBackgroundColor(Color.CYAN);
-			}
-			tv.setText(String.valueOf(getItem(position) / 10));
-			return tv;
-		}
 	}
 
 	/* Non-ListViewAnimations related stuff below */
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.menu_appearance, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.menu_appearance_sticky:
-			switchListViews();
-			item.setChecked(mCurrentListView == mStickyListView);
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
-
-	private void switchListViews() {
-		mListView.setVisibility(mCurrentListView == mListView ? View.GONE : View.VISIBLE);
-		mStickyListView.setVisibility(mCurrentListView == mListView ? View.VISIBLE : View.GONE);
-		mCurrentListView = mCurrentListView == mListView ? mStickyListView : mListView;
-
-		onNavigationItemSelected(getSupportActionBar().getSelectedNavigationIndex(), -1);
-	}
 
 	@Override
 	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
@@ -194,24 +124,15 @@ public class AppearanceExamplesActivity extends BaseActivity implements OnNaviga
 			return true;
 		case 1:
 			setLeftAdapter();
-			if (mCurrentListView == mStickyListView) {
-				Toast.makeText(this, "Due to StickyListHeaders limitations the SwingLeftInAdapter can't work properly", Toast.LENGTH_LONG).show();
-			}
 			return true;
 		case 2:
 			setRightAdapter();
-			if (mCurrentListView == mStickyListView) {
-				Toast.makeText(this, "Due to StickyListHeaders limitations the SwingRightInAdapter can't work properly", Toast.LENGTH_LONG).show();
-			}
 			return true;
 		case 3:
 			setBottomAdapter();
 			return true;
 		case 4:
 			setBottomRightAdapter();
-			if (mCurrentListView == mStickyListView) {
-				Toast.makeText(this, "Due to StickyListHeaders limitations the SwingRightInAdapter can't work properly", Toast.LENGTH_LONG).show();
-			}
 			return true;
 		case 5:
 			setScaleAdapter();
@@ -232,7 +153,6 @@ public class AppearanceExamplesActivity extends BaseActivity implements OnNaviga
 			TextView tv = (TextView) convertView;
 			if (tv == null) {
 				tv = (TextView) LayoutInflater.from(AppearanceExamplesActivity.this).inflate(android.R.layout.simple_list_item_1, parent, false);
-				tv.setTextColor(Color.WHITE);
 			}
 
 			tv.setText(getItem(position));

@@ -8,11 +8,15 @@ A mention to haarman.niek [at] gmail.com about your app using this library is ve
 Known applications using ListViewAnimations
 -----
 * Ultimate Tic-Tac-Toe ([Play Store][12])
+* Light Flow Lite - LED Control ([Play Store][18])
 * TreinVerkeer ([Play Store][6])
 * Running Coach ([Play Store][9])
+* Pearl Jam Lyrics ([Play Store][19])
+* Calorie Chart ([Play Store][20])
 * Car Hire ([Play Store][10])
 * Super BART ([Play Store][11])
 * DK FlashCards ([Play Store][15])
+* Voorlees Verhaaltjes 2.0 ([Play Store][21])
 
 If you want your app to be listed as well please contact me via [Google Plus][8], or send me an email at haarman.niek [at] gmail.com, starting the title with `[LVA]`.
 
@@ -36,7 +40,8 @@ Setup
 Or:
 
 * [Download the .jar file][4]
-* Add the .jar to your project's `libs` folder, or add it as an external jar to your project's build path.
+* [Download the latest NineOldAndroids .jar file][17]
+* Add the .jar files to your project's `libs` folder, or add them as external jars to your project's build path.
 
 Usage
 -----
@@ -56,7 +61,6 @@ Special Thanks
 * Roman Nurik - The ListViewAnimations library uses a modified version of his [SwipeDismissListViewTouchListener][5] to support swipe-to-dismiss.
 * DevBytes - Drag-and-Drop reordering is done by a modified version of their [DynamicListView][16].
 * Jake Warthon - To support devices pre-HC (<3.0), a jar file of [NineOldAndroids][2] is included.
-* Emil Sjölander - If you're already using the [StickyListHeaders][14] library, the ListViewAnimations library makes sure your header views are animated as well. Therefore, a copy of the StickyListHeaders jar file is included.
 
 License
 -----
@@ -78,7 +82,7 @@ License
  [1]: https://play.google.com/store/apps/details?id=com.haarman.listviewanimations
  [2]: http://nineoldandroids.com/
  [3]: http://en.wikipedia.org/wiki/Decorator_pattern
- [4]: https://github.com/nhaarman/ListViewAnimations/blob/master/com.haarman.listviewanimations-2.4.0.jar?raw=true
+ [4]: https://github.com/nhaarman/ListViewAnimations/blob/master/com.haarman.listviewanimations-2.5.2.jar?raw=true
  [5]: https://gist.github.com/romannurik/2980593
  [6]: https://play.google.com/store/apps/details?id=com.haarman.treinverkeer
  [7]: https://www.twitter.com/niekfct
@@ -88,6 +92,10 @@ License
  [11]: https://play.google.com/store/apps/details?id=com.getgoodcode.bart
  [12]: https://play.google.com/store/apps/details?id=com.haarman.ultimatettt
  [13]: https://github.com/nhaarman/ListViewAnimations/wiki
- [14]: http://emilsjolander.github.io/StickyListHeaders/
  [15]: https://play.google.com/store/apps/details?id=com.ducky.flashcards
  [16]: http://youtu.be/_BZIvjMgH-Q
+ [17]: https://github.com/JakeWharton/NineOldAndroids/downloads
+ [18]: https://play.google.com/store/apps/details?id=com.rageconsulting.android.lightflowlite
+ [19]: https://play.google.com/store/apps/details?id=com.juannale.pearljamlyricsapp
+ [20]: https://play.google.com/store/apps/details?id=com.cafetaso.foodinfo
+ [21]: https://play.google.com/store/apps/details?id=sa.voorleesVerhaaltjes

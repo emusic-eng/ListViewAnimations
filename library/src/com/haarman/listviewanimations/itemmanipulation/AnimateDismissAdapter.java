@@ -24,10 +24,11 @@ import java.util.List;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 
 import com.haarman.listviewanimations.BaseAdapterDecorator;
 import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.Animator.AnimatorListener;
+import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ValueAnimator;
 import com.nineoldandroids.animation.ValueAnimator.AnimatorUpdateListener;
@@ -86,23 +87,11 @@ public class AnimateDismissAdapter<T> extends BaseAdapterDecorator {
 			}
 
 			animatorSet.playTogether(animatorsArray);
-			animatorSet.addListener(new AnimatorListener() {
-
-				@Override
-				public void onAnimationStart(Animator animator) {
-				}
-
-				@Override
-				public void onAnimationRepeat(Animator animator) {
-				}
+			animatorSet.addListener(new AnimatorListenerAdapter() {
 
 				@Override
 				public void onAnimationEnd(Animator animator) {
 					invokeCallback(positionsCopy);
-				}
-
-				@Override
-				public void onAnimationCancel(Animator animator) {
 				}
 			});
 			animatorSet.start();
@@ -114,9 +103,15 @@ public class AnimateDismissAdapter<T> extends BaseAdapterDecorator {
 	private void invokeCallback(Collection<Integer> positions) {
 		ArrayList<Integer> positionsList = new ArrayList<Integer>(positions);
 		Collections.sort(positionsList);
+
+		int nrHeaders = 0;
+		if (getAbsListView() instanceof ListView) {
+			nrHeaders = ((ListView) getAbsListView()).getHeaderViewsCount();
+		}
+
 		int[] dismissPositions = new int[positionsList.size()];
 		for (int i = 0; i < positionsList.size(); i++) {
-			dismissPositions[i] = positionsList.get(positionsList.size() - 1 - i);
+			dismissPositions[i] = positionsList.get(positionsList.size() - 1 - i - nrHeaders);
 		}
 		mCallback.onDismiss(getAbsListView(), dismissPositions);
 	}
@@ -137,24 +132,12 @@ public class AnimateDismissAdapter<T> extends BaseAdapterDecorator {
 		final int originalHeight = view.getHeight();
 
 		ValueAnimator animator = ValueAnimator.ofInt(originalHeight, 0);
-		animator.addListener(new AnimatorListener() {
-
-			@Override
-			public void onAnimationStart(Animator animator) {
-			}
-
-			@Override
-			public void onAnimationRepeat(Animator animator) {
-			}
+		animator.addListener(new AnimatorListenerAdapter() {
 
 			@Override
 			public void onAnimationEnd(Animator animator) {
 				lp.height = 0;
 				view.setLayoutParams(lp);
-			}
-
-			@Override
-			public void onAnimationCancel(Animator animator) {
 			}
 		});
 
