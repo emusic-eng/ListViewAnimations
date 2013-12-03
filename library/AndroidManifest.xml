@@ -4,8 +4,8 @@
     android:versionName="2.5.2" >
 
     <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="17" />
+        android:minSdkVersion="15"
+        android:targetSdkVersion="19" />
     <application />
 
 </manifest>
